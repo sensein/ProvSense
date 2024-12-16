@@ -3,10 +3,10 @@ name = "ProvSense"
 version = "0.0.1"
 description = "ProvSense is a Python library for managing knowledge graph provenance. It enables efficient comparison of files, tracking changes, and enforcing provenance rules to ensure data integrity and traceability. Ideal for researchers and developers, ProvSense promotes transparency and accountability in data-driven workflows."
 authors = [
-    "https://github.com/tekrajchhetri <tekraj@mit.edu>",
+    "tekrajchhetri <tekraj@mit.edu>",
 ]
 maintainers = [
-    "https://github.com/tekrajchhetri <tekraj@mit.edu>",
+    "tekrajchhetri <tekraj@mit.edu>",
 ]
 license = "Apache-2.0"
 readme = "README.md"
