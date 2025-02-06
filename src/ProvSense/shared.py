@@ -25,38 +25,82 @@ from rdflib import Graph
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 logger = logging.getLogger(__name__)
-def read_file(path):
-    with open(path, 'r') as file:
-        jsonld_data = json.load(file)
-    return json.dumps(jsonld_data)
 
+import os
+
+def read_file(path):
+    """
+    Read the content of a file (JSON-LD, Turtle, or N-Triples) and return it as a string.
+
+    This function reads the file as plain text, regardless of its format.
+    It supports JSON-LD (.jsonld), Turtle (.ttl), and N-Triples (.nt) files.
+
+    Args:
+        path (str): The file path to the RDF file.
+
+    Returns:
+        str: The raw content of the file as a string.
+
+    Raises:
+        FileNotFoundError: If the specified file does not exist.
+        ValueError: If the file format is unsupported.
+
+    Example:
+        >>> with open("example.jsonld", "w") as f:
+        ...     f.write('{"@context": "http://schema.org", "name": "Alice"}')
+
+        >>> read_file("example.jsonld")
+        '{"@context": "http://schema.org", "name": "Alice"}'
+    """
+    if not os.path.isfile(path):
+        raise FileNotFoundError(f"File not found: {path}")
+
+    # Determine file format based on extension
+    file_extension = os.path.splitext(path)[1].lower()
+    if file_extension not in {'.jsonld', '.ttl', '.nt'}:
+        raise ValueError(f"Unsupported file format: {file_extension}")
+
+    # Read file content
+    with open(path, 'r', encoding='utf-8') as file:
+        return file.read()
 
 def detect_rdf_format(data: str):
     """
-    Detects whether the given data is in Turtle (TTL), JSON-LD, or N-Triples format.
+    Detect the format of a given RDF data string.
 
-    Parameters:
+    This function analyzes the provided RDF string and determines whether it is in
+    Turtle (TTL), JSON-LD, or N-Triples (NT) format. If the format cannot be identified,
+    it returns 'Unknown'.
+
+    Args:
         data (str): The RDF data as a string.
 
     Returns:
-        str: The detected format ('turtle', 'json-ld', 'nt', or 'Unknown').
+        str: The detected format, which can be one of the following:
+            - 'turtle' for Turtle (TTL) format.
+            - 'json-ld' for JSON-LD format.
+            - 'nt' for N-Triples (NT) format.
+            - 'Unknown' if the format cannot be determined.
 
-        Example 1:
+    Examples:
+        Example 1 (Turtle format):
             Input:
                 @prefix ex: <http://example.org/> .
                 ex:PersonA ex:name "Alice" .
                 ex:PersonA ex:worksAt ex:CompanyY .
                 ex:CompanyY ex:location "New York" .
-            Output: turtle
+            Output:
+                'turtle'
 
-        Example 2:
+        Example 2 (N-Triples format):
             Input:
                 <http://example.org/PersonA> <http://example.org/name> "Alice" .
                 <http://example.org/PersonA> <http://example.org/worksAt> <http://example.org/CompanyY> .
                 <http://example.org/CompanyY> <http://example.org/location> "New York" .
-            Output: nt
+            Output:
+                'nt'
 
-        Example 3:
+        Example 3 (JSON-LD format):
             Input:
                {
                   "@context": "http://example.org/",
@@ -66,8 +110,9 @@ def detect_rdf_format(data: str):
                   "worksAt": {
                     "@id": "CompanyY"
                   }
-                }
-            Output: json-ld
+               }
+            Output:
+                'json-ld'
     """
     logger.info("Checking the input types, i.e, whether it is ttl, json-ld or nt")
 
@@ -100,17 +145,21 @@ def detect_rdf_format(data: str):
 
 def _convert_to_nt(input_string):
     """
-    Converts an RDF string in JSON-LD or Turtle (TTL) format to N-Triples (NT) format.
+    Convert an RDF string from JSON-LD or Turtle (TTL) format to N-Triples (NT) format.
 
-    Parameters:
-        input_string (str): The input RDF string.
+    This function takes an RDF string in either JSON-LD or Turtle format, parses its contents,
+    and converts it into the N-Triples format, a line-based RDF serialization.
+
+    Args:
+        input_string (str): The RDF data as a string in JSON-LD or Turtle format.
 
     Returns:
-        str: The N-Triples representation of the RDF data.
+        str: The RDF data converted into N-Triples format.
 
     Raises:
-        ValueError: If the input format is unsupported or cannot be parsed.
+        ValueError: If the input format is unsupported or the RDF data cannot be parsed.
     """
+
 
     input_type = detect_rdf_format(input_string)
 
@@ -118,10 +167,8 @@ def _convert_to_nt(input_string):
         return input_string
 
     try:
-        if input_type == "json-ld":
-            return Graph().parse(data=input_string, format='json-ld').serialize(format="nt")
-        elif input_type == "turtle":
-            return Graph().parse(data=input_string, format='turtle').serialize(format="nt")
+        if input_type == "json-ld" or input_type == "turtle":
+            return Graph().parse(data=input_string, format=input_type).serialize(format="nt")
         else:
             logging.error((f"Unsupported RDF format detected: {input_type}"))
             raise ValueError(f"Unsupported RDF format detected: {input_type}")
@@ -131,16 +178,44 @@ def _convert_to_nt(input_string):
         raise ValueError(f"Failed to convert RDF data to N-Triples: {str(e)}")
 
 def get_file_extension(file_name):
+    """
+    Extract the file extension from a given file name.
+
+    This function retrieves the file extension (including the dot) from the provided file name
+    and returns it in lowercase.
+
+    Args:
+        file_name (str): The name of the file, including its extension.
+
+    Returns:
+        str: The file extension in lowercase (e.g., '.txt', '.json', '.ttl').
+              Returns an empty string if no extension is found.
+
+    Example:
+        >>> get_file_extension("example.json")
+        '.json'
+
+        >>> get_file_extension("document.TTL")
+        '.ttl'
+
+        >>> get_file_extension("no_extension")
+        ''
+    """
+
     return os.path.splitext(file_name)[1].lower()
 
 def convert_single_file_to_nt(input_file):
-    """Convert a single JSON-LD or Turtle (TTL)file to ntriple format.
-    
+    """
+    Convert a JSON-LD or Turtle (TTL) file to N-Triples (N-Triples) format.
+
+    This function reads a given JSON-LD or TTL file, processes its RDF data, and converts it into
+    the N-Triples format, which is a line-based RDF serialization.
+
     Args:
-        file_path (str): Path to the JSON-LD or Turtle (TTL) file
-        
+        file_path (str): The path to the input file, which must be in JSON-LD or Turtle format.
+
     Returns:
-        str: In ntriple format
+        str: A string representation of the RDF data in N-Triples format.
     """
     valid_extensions = {".jsonld", ".ttl", ".nt"}
     if get_file_extension(input_file) not in valid_extensions:
@@ -188,3 +263,7 @@ if __name__ == "__main__":
     input_src_file = "../../example/test_dst.jsonld"
     print("Converting file   to ntriples")
     print(convert_single_file_to_nt(input_src_file))
+
+    input_src_ttl_file = "../../example/test_data.ttl"
+    print("Converting ttl file   to ntriples")
+    print(convert_single_file_to_nt(input_src_ttl_file))
