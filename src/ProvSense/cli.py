@@ -1,17 +1,74 @@
-"""This module defines CLI commands for the PipePal application."""
+"""
+This module defines CLI commands for the ProvSense application.
+"""
 
 import click
-
-from .app import hello_world as hw_function  # Renamed to avoid conflict
-
+from pathlib import Path
 
 @click.group()
-def main() -> None:
-    """Define the main CLI group."""
+@click.pass_context
+def cli(ctx):
+    """CLI commands for the ProvSense"""
     pass
 
 
-@main.command()
-def hello_world() -> None:
-    """Execute the hello_world command from the app module."""
-    hw_function()
+@cli.command()
+@click.option(
+    '--source',
+    required=True,
+    help=(
+        "Source path (file/folder) or string (e.g., JSON-LD/TTL) for comparison. "
+        "If providing a string, ensure it is properly formatted."
+    )
+)
+
+@click.option(
+    '--destination',
+    required=True,
+    help=(
+        "Destination path (file/folder) or string (e.g., JSON-LD/TTL) for comparison. "
+        "If providing a string, ensure it is properly formatted."
+    )
+)
+@click.option(
+    '--compare_type',
+    type=click.Choice(['folder', 'file', 'kg_str'], case_sensitive=False),
+    required=True,
+    default='file',
+    help=(
+        "Type of input source. Options include:\n"
+        "- 'folder': For comparison of KGs present in a folder.\n"
+        "- 'file': Single file containing a KG (default).\n"
+        "- 'kg_str': Knowledge graph content passed as a string."
+    )
+)
+@click.option(
+    '--input_type',
+    type=click.Choice(['jsonld', 'ttl'], case_sensitive=False),
+    required=True,
+    default='file',
+    help=(
+        "Type of input. Options include:\n"
+        "- 'jsonld': Input in JSON-LD format.\n"
+        "- 'ttl': Input in Turtle representation.\n"
+    )
+)
+
+
+def compare(source: str, destination: str, compare_type:str, input_type: str) -> None:
+    """Compare changes in knowledge graph files (JSON-LD, TTL) across different input sources—whether processing multiple files from a folder, a single file, or a direct input string..
+
+    Supports:
+    - folder to folder comparison
+    - file to file comparison
+    - string to string comparison (JSON-LD/TTL)
+    """
+    try:
+        # compare_items(source, destination, type)    to be implemented.
+        click.echo(f"Comparing {source} with {destination} as {compare_type} in {input_type} format.")
+    except Exception as e:
+        click.echo(f"Error: {str(e)}", err=True)
+        raise click.Abort()
+
+if __name__ == "__main__":
+    cli()
