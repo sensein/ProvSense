@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, mock_open
 import os
-from ProvSense.helper import _convert_to_nt, convert_single_file_to_nt
+from ProvSense.shared import _convert_to_nt, convert_single_file_to_nt
 
 class TestNTriplesConversion(unittest.TestCase):
     def setUp(self):
