@@ -31,30 +31,45 @@ def cli(ctx):
     )
 )
 
-@click.option(
-    '--input_type',
-    type=click.Choice(['jsonld', 'ttl'], case_sensitive=False),
-    required=True,
-    default='file',
-    help=(
-        "Type of input. Options include:\n"
-        "- 'jsonld': Input in JSON-LD format.\n"
-        "- 'ttl': Input in Turtle representation.\n"
-    )
-)
 
-
-def compare(source: str, destination: str, compare_type:str, input_type: str) -> None:
-    """Compare changes in knowledge graph files (JSON-LD, TTL) across different input sources—whether processing multiple files from a folder, a single file, or a direct input string..
-
-    Supports:
-    - folder to folder comparison
-    - file to file comparison
-    - string to string comparison (JSON-LD/TTL)
+def compare(source: str, destination: str) -> dict:
     """
+        Compare changes in knowledge graph files (JSON-LD, Turtle) across different input sources.
+
+        This function detects and analyzes differences between RDF data sources, supporting comparisons
+        at the folder, file, or direct string level.
+
+        Options:
+            --source (str):
+                The first input source, which can be a folder path, file path, or RDF string.
+                If providing a string, ensure it is correctly formatted in JSON-LD or Turtle.
+
+            --destination (str):
+                The second input source, which can be a folder path, file path, or RDF string.
+                If providing a string, ensure it is correctly formatted in JSON-LD or Turtle.
+
+        Returns:
+            dict: A dictionary containing the comparison results highlighting the differences.
+
+        Raises:
+            FileNotFoundError: If the specified folder or file does not exist.
+            ValueError: If an unsupported input type is provided.
+
+        Example Usage:
+
+            Compare two folders:
+            $ cli compare --source "folder1" --destination "folder2"
+
+            Compare two files:
+            $ cli compare --source "file1.ttl" --destination "file2.ttl"
+
+            Compare two RDF strings:
+            $ cli compare --source '{"@context": "http://schema.org", "name": "Alice"}' --destination '{"@context": "http://schema.org", "name": "Bob"}'
+        """
+
     try:
         # compare_items(source, destination, type)    to be implemented.
-        click.echo(f"Comparing {source} with {destination} as {compare_type} in {input_type} format.")
+        click.echo(f"Comparing {source} with {destination}.")
     except Exception as e:
         click.echo(f"Error: {str(e)}", err=True)
         raise click.Abort()
