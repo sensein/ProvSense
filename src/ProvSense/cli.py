@@ -30,18 +30,7 @@ def cli(ctx):
         "If providing a string, ensure it is properly formatted."
     )
 )
-@click.option(
-    '--compare_type',
-    type=click.Choice(['folder', 'file', 'kg_str'], case_sensitive=False),
-    required=True,
-    default='file',
-    help=(
-        "Type of input source. Options include:\n"
-        "- 'folder': For comparison of KGs present in a folder.\n"
-        "- 'file': Single file containing a KG (default).\n"
-        "- 'kg_str': Knowledge graph content passed as a string."
-    )
-)
+
 @click.option(
     '--input_type',
     type=click.Choice(['jsonld', 'ttl'], case_sensitive=False),
