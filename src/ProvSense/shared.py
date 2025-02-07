@@ -20,7 +20,7 @@
 import logging
 import os
 import json
-from rdflib import Graph, ConjunctiveGraph
+from rdflib import Graph, Dataset
 from rdflib.query import Result
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
@@ -268,7 +268,7 @@ def compare_graph(source: str, destination: str) -> list[dict]:
           'dst_value': 'http://example.org/CompanyY'}]
     ```
     """
-    g = ConjunctiveGraph()
+    g = Dataset() #removed ConjunctiveGraph - DeprecationWarning: ConjunctiveGraph is deprecated, use Dataset instead.
 
     # Create named graphs for comparison
     g_src = g.get_context("http://graphcompare.org/src")
@@ -315,7 +315,7 @@ def construct_diff_sparql_query():
         """
     query = """
     PREFIX gcp: <http://graphcompare.org/>
-    SELECT ?subject ?property ?srcGraphValue ?dstGraphValue
+    SELECT DISTINCT ?subject ?property ?srcGraphValue ?dstGraphValue
     WHERE {
         {
             GRAPH <http://graphcompare.org/src> { ?subject ?property ?srcGraphValue }
