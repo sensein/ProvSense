@@ -307,3 +307,5 @@ To run tests with verbose output:
 python -m unittest -v src/tests/test_ttl_conversion.py
 ```
 
+## To do:
+- [ ] Add LLM for advanced comparison 
