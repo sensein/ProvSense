@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ProvSense"
-version = "0.0.1"
+version = "1.0.1"
 description = "ProvSense is a Python library for managing knowledge graph provenance. It enables efficient comparison of files, tracking changes, and enforcing provenance rules to ensure data integrity and traceability. Ideal for researchers and developers, ProvSense promotes transparency and accountability in data-driven workflows."
 authors = [
     "tekrajchhetri <tekraj@mit.edu>",
@@ -15,7 +15,7 @@ repository = "https://github.com/sensein/ProvSense/"
 documentation = "https://sensein.group/brainkbdocs/"
 keywords = ["python", "data-integrity", "file-comparison", "data-governance", "provenance", "knowledge-graph", "provenance-tracking", "reproducibility", "lineage"]
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Programming Language :: Python :: 3.10",
 #  "License :: OSI Approved :: Apache Software License",
 #  "Operating System :: OS Independent"
