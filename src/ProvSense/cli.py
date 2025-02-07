@@ -69,7 +69,8 @@ def compare(source: str, destination: str) -> dict:
 
             `$ cli compare --source '{"@context": "http://schema.org", "name": "Alice"}' --destination '{"@context": "http://schema.org", "name": "Bob"}'`
         """
-    return compare_items(source=source, destination=destination)
+    result =  compare_items(source=source, destination=destination)
+    click.echo(result)
 
     try:
         # compare_items(source, destination, type)    to be implemented.
