@@ -1,13 +1,46 @@
 {
   "@context": {
-    "ex": "http://example.org/",
-    "uuid": "urn:uuid:"
+    "schema": "http://schema.org/",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "dbo": "http://dbpedia.org/ontology/",
+    "dbr": "http://dbpedia.org/resource/",
+    "ex": "http://example.org/"
   },
-  "@id": "uuid:550e8400-e29b-41d4-a716-446655440000",
-  "@type": "ex:Person",
-  "ex:name": "Alice",
-  "ex:location": "New York",
-  "ex:worksAt": {
-    "@id": "ex:CompanyY"
-  }
+  "@id": "dbr:Albert_Einstein",
+  "@type": "schema:Person",
+  "schema:name": "Albert Einstein",
+  "schema:alternateName": ["Einstein", "Prof. Einstein"],
+  "schema:birthDate": "1879-03-14",
+  "schema:deathDate": "1955-04-18",
+  "schema:birthPlace": {
+    "@id": "dbr:Ulm",
+    "schema:name": "Ulm, Kingdom of Württemberg, German Empire"
+  },
+  "schema:nationality": [
+    { "@id": "dbr:Germany", "schema:name": "Germany" },
+    { "@id": "dbr:Switzerland", "schema:name": "Switzerland" },
+    { "@id": "dbr:United_States", "schema:name": "United States" }
+  ],
+  "schema:affiliation": [
+    { "@id": "dbr:Princeton_University", "schema:name": "Princeton University" },
+    { "@id": "dbr:ETH_Zurich", "schema:name": "ETH Zurich" },
+    { "@id": "dbr:University_of_Berlin", "schema:name": "University of Berlin" }
+  ],
+  "schema:knowsAbout": [
+    { "@id": "dbr:Theory_of_relativity", "schema:name": "Theory of Relativity" },
+    { "@id": "dbr:Quantum_mechanics", "schema:name": "Quantum Mechanics" },
+    { "@id": "dbr:Brownian_motion", "schema:name": "Brownian Motion" }
+  ],
+  "schema:award": [
+    {
+      "@id": "dbr:Nobel_Prize_in_Physics",
+      "schema:name": "Nobel Prize in Physics",
+      "schema:dateReceived": "1921"
+    }
+  ],
+  "foaf:depiction": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg",
+  "schema:sameAs": [
+    "https://en.wikipedia.org/wiki/Albert_Einstein",
+    "https://www.wikidata.org/wiki/Q937"
+  ]
 }
