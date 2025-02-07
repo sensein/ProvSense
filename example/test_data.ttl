@@ -1,0 +1,4 @@
+@prefix ex: <http://example.org/> .
+    ex:PersonA ex:name "Alice" .
+    ex:PersonA ex:worksAt ex:CompanyY .
+    ex:CompanyY ex:location "New York" .

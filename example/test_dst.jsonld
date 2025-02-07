@@ -1,0 +1,13 @@
+{
+  "@context": {
+    "ex": "http://example.org/",
+    "uuid": "urn:uuid:"
+  },
+  "@id": "uuid:550e8400-e29b-41d4-a716-446655440000",
+  "@type": "ex:Person",
+  "ex:name": "Alice",
+  "ex:location": "New York",
+  "ex:worksAt": {
+    "@id": "ex:CompanyY"
+  }
+}
