@@ -20,7 +20,8 @@
 import logging
 import os
 import json
-from rdflib import Graph
+from rdflib import Graph, ConjunctiveGraph
+from rdflib.query import Result
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
@@ -143,7 +144,7 @@ def detect_rdf_format(data: str):
 
     return "Unknown"
 
-def _convert_to_nt(input_string):
+def convert_to_nt(input_string):
     """
     Convert an RDF string from JSON-LD or Turtle (TTL) format to N-Triples (NT) format.
 
@@ -226,7 +227,111 @@ def convert_single_file_to_nt(input_file):
         logging.error(f"File not found: {input_file}")
         raise FileNotFoundError(f"File not found: {input_file}")
 
-    return input_file if get_file_extension(input_file)=="nt" else _convert_to_nt(read_file(input_file))
+    return input_file if get_file_extension(input_file)=="nt" else convert_to_nt(read_file(input_file))
+
+def compare_graph(source: str, destination: str) -> list[dict]:
+    """
+    Compares two RDF graphs represented in N-Triples format and identifies differences.
+
+    The function creates two named graphs (`src` and `dst`) using fixed IRIs:
+    - `http://graphcompare.org/src` for the source graph
+    - `http://graphcompare.org/dst` for the destination graph
+
+    It then runs a SPARQL query to detect differences between the graphs.
+
+    Args:
+        source (str): RDF graph in N-Triples format representing the source dataset.
+        destination (str): RDF graph in N-Triples format representing the destination dataset.
+
+    Returns:
+
+     - list[dict]: A list of dictionaries representing the differences found between the graphs.
+                    Each dictionary contains:
+                    - `subject`: The subject of the differing triple.
+                    - `property`: The predicate/property of the differing triple.
+                    - `src_value`: The object value from the source graph (if available).
+                    - `dst_value`: The object value from the destination graph (if available).
+
+    Sample output
+    ```Python
+          [{'subject': 'urn:uuid:550e8400-e29b-41d4-a716-446655440000',
+          'property': 'http://example.org/worksAt',
+          'src_value': 'http://example.org/CompanyX1',
+          'dst_value': 'http://example.org/CompanyY'},
+         {'subject': 'urn:uuid:550e8400-e29b-41d4-a716-446655440000',
+          'property': 'http://example.org/location',
+          'src_value': None,
+          'dst_value': 'New York'},
+         {'subject': 'urn:uuid:550e8400-e29b-41d4-a716-446655440000',
+          'property': 'http://example.org/worksAt',
+          'src_value': 'http://example.org/CompanyX1',
+          'dst_value': 'http://example.org/CompanyY'}]
+    ```
+    """
+    g = ConjunctiveGraph()
+
+    # Create named graphs for comparison
+    g_src = g.get_context("http://graphcompare.org/src")
+    g_src.parse(data=source, format="nt")
+
+    g_dst = g.get_context("http://graphcompare.org/dst")
+    g_dst.parse(data=destination, format="nt")
+
+
+    results: Result = g.query(construct_diff_sparql_query())
+
+    # Convert results to a list of dictionaries
+    result_list = [
+        {
+            "subject": str(row.subject),
+            "property": str(row.property),
+            "src_value": str(row.srcGraphValue) if row.srcGraphValue else None,
+            "dst_value": str(row.dstGraphValue) if row.dstGraphValue else None,
+        }
+        for row in results
+    ]
+
+    return result_list
+
+def construct_diff_sparql_query():
+    """
+        Constructs a SPARQL query to compare RDF triples from two named graphs:
+        a source graph (`src`) and a destination graph (`dst`). The query identifies
+        triples that differ between the two graphs, including:
+
+        - Triples present in the source graph but either missing or different in the destination graph.
+        - Triples present in the destination graph but either missing or different in the source graph.
+
+        The query retrieves the following variables:
+        - `?subject`: The subject of the triple.
+        - `?property`: The predicate/property of the triple.
+        - `?srcGraphValue`: The object value from the source graph (if available).
+        - `?dstGraphValue`: The object value from the destination graph (if available).
+
+        The results are ordered by `?subject`.
+
+        Returns:
+            str: The SPARQL query as a string.
+        """
+    query = """
+    PREFIX gcp: <http://graphcompare.org/>
+    SELECT ?subject ?property ?srcGraphValue ?dstGraphValue
+    WHERE {
+        {
+            GRAPH <http://graphcompare.org/src> { ?subject ?property ?srcGraphValue }
+            OPTIONAL { GRAPH <http://graphcompare.org/dst> { ?subject ?property ?dstGraphValue } }
+            FILTER (!BOUND(?dstGraphValue) || ?srcGraphValue != ?dstGraphValue) 
+        }
+        UNION
+        {
+            GRAPH <http://graphcompare.org/dst> { ?subject ?property ?dstGraphValue }
+            OPTIONAL { GRAPH <http://graphcompare.org/src> { ?subject ?property ?srcGraphValue } }
+            FILTER (!BOUND(?srcGraphValue) || ?srcGraphValue != ?dstGraphValue) 
+        }
+    }
+    ORDER BY ?subject
+    """
+    return query
 
 if __name__ == "__main__":
     input_ttl_data = """
@@ -236,7 +341,7 @@ if __name__ == "__main__":
     ex:CompanyY ex:location "New York" .
     """
     print("Converting ttl data to ntriples")
-    print(_convert_to_nt(input_ttl_data))
+    print(convert_to_nt(input_ttl_data))
 
     jsonld_data = """
     {
@@ -250,7 +355,7 @@ if __name__ == "__main__":
     }
     """
     print("Converting jsonld data to ntriples")
-    print(_convert_to_nt(jsonld_data))
+    print(convert_to_nt(jsonld_data))
 
     ntriples_data = """
     <http://example.org/PersonA> <http://example.org/name> "Alice" .
@@ -258,7 +363,7 @@ if __name__ == "__main__":
     <http://example.org/CompanyY> <http://example.org/location> "New York" .
     """
     print("Converting ntriples_data   to ntriples")
-    print(_convert_to_nt(ntriples_data))
+    print(convert_to_nt(ntriples_data))
 
     input_src_file = "../../example/test_dst.jsonld"
     print("Converting file   to ntriples")

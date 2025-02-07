@@ -3,7 +3,7 @@ This module defines CLI commands for the ProvSense application.
 """
 
 import click
-from pathlib import Path
+from .app import compare_items
 
 @click.group()
 @click.pass_context
@@ -40,11 +40,12 @@ def compare(source: str, destination: str) -> dict:
         at the folder, file, or direct string level.
 
         Options:
-            --source (str):
+
+        - --source (str):
                 The first input source, which can be a folder path, file path, or RDF string.
                 If providing a string, ensure it is correctly formatted in JSON-LD or Turtle.
 
-            --destination (str):
+        - --destination (str):
                 The second input source, which can be a folder path, file path, or RDF string.
                 If providing a string, ensure it is correctly formatted in JSON-LD or Turtle.
 
@@ -56,16 +57,19 @@ def compare(source: str, destination: str) -> dict:
             ValueError: If an unsupported input type is provided.
 
         Example Usage:
+          - Compare two folders:
 
-            Compare two folders:
-            $ cli compare --source "folder1" --destination "folder2"
+           `$ cli compare --source "folder1" --destination "folder2"`
 
-            Compare two files:
-            $ cli compare --source "file1.ttl" --destination "file2.ttl"
+          - Compare two files:
 
-            Compare two RDF strings:
-            $ cli compare --source '{"@context": "http://schema.org", "name": "Alice"}' --destination '{"@context": "http://schema.org", "name": "Bob"}'
+            `$ cli compare --source "file1.ttl" --destination "file2.ttl"`
+
+          - Compare two RDF strings:
+
+            `$ cli compare --source '{"@context": "http://schema.org", "name": "Alice"}' --destination '{"@context": "http://schema.org", "name": "Bob"}'`
         """
+    return compare_items(source=source, destination=destination)
 
     try:
         # compare_items(source, destination, type)    to be implemented.
